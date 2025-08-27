@@ -1,5 +1,5 @@
 {
-  "name": "Development Container",
+  "name": "Microwise development container",
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
 
   "features": {
