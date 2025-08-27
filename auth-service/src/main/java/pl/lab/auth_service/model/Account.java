@@ -9,6 +9,7 @@ import jakarta.validation.constraints.*;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.time.LocalDateTime;
 
 @Entity
 @Table
@@ -39,6 +40,7 @@ public class Account {
             inverseJoinColumns = @JoinColumn(name = "role_id"))
     private Set<Role> roles = new HashSet<>();
 
+    private java.time.LocalDateTime lastLogin;
 
     public Account(String nickname, String email, String password) {
         this.nickname = nickname;

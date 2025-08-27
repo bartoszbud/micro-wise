@@ -27,7 +27,7 @@ services:
       - db-account
   auth:
     build: ./auth-service
-    image: auth-service:0.0.5
+    image: auth-service:0.0.6
     container_name: auth-service
     restart: always
     ports:

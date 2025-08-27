@@ -95,6 +95,12 @@ public class AuthenticationService {
         SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
 
         UserDetails userDetails = (UserDetails) authenticationResponse.getPrincipal();
+
+        accountRepository.findByEmail(userDetails.getUsername()).ifPresent(account -> {
+                account.setLastLogin(java.time.LocalDateTime.now());
+                accountRepository.save(account);
+            });
+
         return userDetails.getUsername(); // email
     }
 
