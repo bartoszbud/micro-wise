@@ -1,0 +1,24 @@
+services:
+  db:
+    image: postgres
+    container_name: db-account-dev
+    restart: always
+    shm_size: 128mb
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_USER: account
+      POSTGRES_PASSWORD: account123
+      POSTGRES_DB: account
+  backend:
+    image: account:0.0.1
+    container_name: account-dev
+    restart: always
+    ports:
+      - 8080:8080
+  adminer:
+    image: adminer
+    container_name: adminer-account-dev
+    restart: always
+    ports:
+      - 8081:8080

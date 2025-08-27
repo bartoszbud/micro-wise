@@ -1,0 +1,27 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: auth-service
+  config:
+    import: "optional:configserver:"
+  datasource:
+    url: jdbc:postgresql://db-auth:5432/auth
+    username: auth
+    password: auth123
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+      show-sql: true
+
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+jwt:
+  token:
+    secret: ${SECRET_KEY}
+    expires: 30

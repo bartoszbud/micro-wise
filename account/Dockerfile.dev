@@ -1,0 +1,15 @@
+FROM maven:3.9.5-eclipse-temurin-21 AS builder
+
+WORKDIR /opt/build
+
+COPY . .
+
+RUN mvn clean install -Dmaven.test.skip=true
+
+FROM ubuntu/jre:21-24.04_stable
+
+WORKDIR /opt/app
+
+COPY --from=builder /opt/build/target/account*.jar /opt/app/account.jar 
+
+CMD [ "exec", "java", "-Dspring.profiles.active=dev", "-jar", "/opt/app/account.jar" ]

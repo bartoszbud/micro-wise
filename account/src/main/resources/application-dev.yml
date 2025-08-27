@@ -1,0 +1,33 @@
+server:
+    port: 8080
+
+eureka:
+    client:
+        enabled: false
+
+spring:
+    application:
+        name: account
+    config:
+        import: "optional:configserver:"
+    datasource:
+        url: jdbc:postgresql://db-account-dev:5432/account
+        username: account
+        password: account123
+        driver-class-name: org.postgresql.Driver
+    jpa:
+        hibernate:
+            ddl-auto: update
+        show-sql: true
+
+management:
+    otlp:
+        tracing:
+            enabled: false
+    metrics:
+        export:
+            enabled: false
+    endpoints:
+        web:
+            exposure:
+                include: "*"

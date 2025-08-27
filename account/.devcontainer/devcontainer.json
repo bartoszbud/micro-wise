@@ -1,0 +1,40 @@
+{
+  "name": "Development Container",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "21",
+      "installMaven": "true",
+      "mavenVersion": "3.9.5"
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
+  "postCreateCommand": "sudo git config --system --add safe.directory \"*\";mvn -N wrapper:wrapper;pre-commit autoupdate; pre-commit install --hook-type commit-msg; pre-commit install",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "dev.containers.copyGitConfig": true,
+        "files.eol": "\n",
+        "terminal.integrated.scrollback": 1000,
+        "terminal.integrated.profiles.linux": "bash",
+        "terminal.integrated.defaultProfile.linux": "bash",
+      },
+      "extensions": [
+        "github.vscode-github-actions",
+        "vscjava.vscode-java-pack",
+        "redhat.java",
+        "timonwong.shellcheck",
+        "davidanson.vscode-markdownlint",
+        "streetsidesoftware.code-spell-checker",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-containers",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  }
+}

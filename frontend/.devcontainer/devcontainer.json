@@ -1,0 +1,33 @@
+{
+  "name": "Development Container",
+  "image": "mcr.microsoft.com/vscode/devcontainers/javascript-node:22",
+
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {},
+    "ghcr.io/devcontainers-extra/features/pre-commit:2": {},
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+  },
+
+  //"postCreateCommand": "sudo git config --system --add safe.directory \"*\";",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "dev.containers.copyGitConfig": true,
+        "files.eol": "\n",
+        "terminal.integrated.scrollback": 1000,
+        "terminal.integrated.profiles.linux": "bash",
+        "terminal.integrated.defaultProfile.linux": "bash",
+      },
+      "extensions": [
+        "github.vscode-github-actions",
+        "timonwong.shellcheck",
+        "davidanson.vscode-markdownlint",
+        "streetsidesoftware.code-spell-checker",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-containers",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
+  }
+}
