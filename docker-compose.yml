@@ -26,6 +26,7 @@ services:
       - db-auth
       - db-account
   auth:
+    build: ./auth-service
     image: auth-service:0.0.5
     container_name: auth-service
     restart: always
@@ -36,12 +37,14 @@ services:
     environment:
       SECRET_KEY: "gAHIHtgTBVT0LKqGOZpaM2CacosnA7WTMK/DY8yp18CpLg54omSnYLmhDHe3/+dWlWXPFDtqWjKpzV2ehyayIQ=="
   account:
+    build: ./account
     image: account:0.0.1
     container_name: account
     restart: always
     depends_on:
       - db-account
   frontend:
+    build: ./frontend
     image: frontend:0.0.6
     container_name: front
     restart: always
