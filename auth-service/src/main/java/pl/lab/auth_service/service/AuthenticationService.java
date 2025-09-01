@@ -1,6 +1,7 @@
 package pl.lab.auth_service.service;
 
 import pl.lab.auth_service.Dto.LoginRequest;
+import pl.lab.auth_service.Dto.LoginResponse;
 import pl.lab.auth_service.Dto.SignupRequest;
 import pl.lab.auth_service.model.Account;
 import pl.lab.auth_service.model.ERole;
@@ -22,6 +23,8 @@ import org.springframework.http.MediaType;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 public class AuthenticationService {
@@ -51,7 +54,10 @@ public class AuthenticationService {
         this.restTemplate = restTemplate;
     }
 
-    public String login(LoginRequest loginRequest) {
+    /**
+     * Logowanie użytkownika i zwrócenie email + nickname + ról
+     */
+    public LoginResponse login(LoginRequest loginRequest) {
         Authentication authenticationRequest =
                 UsernamePasswordAuthenticationToken.unauthenticated(
                         loginRequest.getEmail(),
@@ -63,14 +69,25 @@ public class AuthenticationService {
 
         UserDetails userDetails = (UserDetails) authenticationResponse.getPrincipal();
 
-        accountRepository.findByEmail(userDetails.getUsername()).ifPresent(account -> {
-            account.setLastLogin(java.time.LocalDateTime.now());
-            accountRepository.save(account);
-        });
+        Account account = accountRepository.findByEmail(userDetails.getUsername())
+                .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        return userDetails.getUsername(); // email
+        // Aktualizacja ostatniego logowania
+        account.setLastLogin(java.time.LocalDateTime.now());
+        accountRepository.save(account);
+
+        // Zbieramy role jako Stringi
+        Set<String> roles = account.getRoles().stream()
+                .map(role -> role.getName().name())
+                .collect(Collectors.toSet());
+
+        // Zwracamy email, nickname i role
+        return new LoginResponse(account.getEmail(), account.getNickname(), roles);
     }
 
+    /**
+     * Rejestracja nowego konta z domyślną rolą ROLE_USER i powiadomienie mikroserwisu employee
+     */
     public void registerAccount(SignupRequest signupRequest) {
         System.out.println("Received signup request:");
         System.out.println("Name: " + signupRequest.getName());
@@ -116,4 +133,25 @@ public class AuthenticationService {
             System.out.println("Error sending request to employee service: " + e.getMessage());
         }
     }
+
+    /**
+     * Zmiana hasła użytkownika
+    */
+    public void changePassword(String email, String oldPassword, String newPassword) {
+        // Znajdź konto po emailu
+        Account account = accountRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("Account not found"));
+
+        // Weryfikacja starego hasła
+        if (!passwordEncoder.matches(oldPassword, account.getPassword())) {
+            throw new RuntimeException("Old password is incorrect");
+        }
+
+        // Zapisz nowe hasło
+        account.setPassword(passwordEncoder.encode(newPassword));
+        accountRepository.save(account);
+
+        System.out.println("Password changed successfully for account: " + email);
+    }
+
 }

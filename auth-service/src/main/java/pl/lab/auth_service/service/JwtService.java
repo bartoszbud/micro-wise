@@ -57,6 +57,10 @@ public class JwtService {
         return claims != null ? claims.getSubject() : null;
     }
 
+    public String extractRole() {
+        return claims != null ? claims.get("role", String.class) : null;
+    }
+
     private SecretKey getSignInKey() {
         byte[] keyBytes = Decoders.BASE64.decode(this.secret);
         return Keys.hmacShaKeyFor(keyBytes);
