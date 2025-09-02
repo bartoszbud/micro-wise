@@ -1,7 +1,9 @@
 package pl.lab.auth_service.controller;
 
 import pl.lab.auth_service.Dto.LoginRequest;
+import pl.lab.auth_service.Dto.LoginResponse;
 import pl.lab.auth_service.Dto.SignupRequest;
+import pl.lab.auth_service.Dto.ChangePasswordRequest;
 import pl.lab.auth_service.service.AuthenticationService;
 import pl.lab.auth_service.service.JwtService;
 
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
@@ -33,19 +36,25 @@ public class AuthenticationController {
     @PostMapping("/signin")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         try {
-            // tu zakładam, że AuthenticationService.login zwraca email po poprawnym zalogowaniu
-            String email = authenticationService.login(loginRequest);
+            // teraz login zwraca LoginResponse
+            LoginResponse loginResponse = authenticationService.login(loginRequest);
 
-            String token = jwtService.generateToken(email);
+            // generujemy token na podstawie emaila
+            Set<String> roles = loginResponse.getRoles(); 
+            String token = jwtService.generateToken(loginRequest.getEmail(), roles);
 
-            // zwracamy JSON { "token": "...", "email": "..." }
-            return ResponseEntity.ok(Map.of(
-                    "token", token,
-                    "email", email
-            ));
+            // zwracamy JSON z tokenem i danymi użytkownika
+            Map<String, Object> response = Map.of(
+                "token", token,
+                "email", loginResponse.getEmail(),
+                "nickname", loginResponse.getNickname(),
+                "roles", loginResponse.getRoles()
+            );
+
+            return ResponseEntity.ok(response);
 
         } catch (Exception e) {
-            logger.error(e.getMessage());
+            logger.error(e.getMessage(), e);
             return new ResponseEntity<>(e.getMessage(), HttpStatus.UNAUTHORIZED);
         }
     }
@@ -86,4 +95,15 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
         }
     }
+
+    @PostMapping("/change-password")
+    public ResponseEntity<?> changePassword(@RequestBody ChangePasswordRequest request) {
+        try {
+            authenticationService.changePassword(request.getEmail(), request.getOldPassword(), request.getNewPassword());
+            return ResponseEntity.ok("Password changed successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
 }

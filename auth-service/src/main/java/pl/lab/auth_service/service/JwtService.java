@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.Set;
 
 @Service
 public class JwtService {
@@ -23,11 +24,12 @@ public class JwtService {
     private Claims claims;
 
     /**
-     * Generuje JWT dla użytkownika (email jako subject).
+     * Generuje JWT dla użytkownika (email jako subject + role).
      */
-    public String generateToken(String email) {
+    public String generateToken(String email, Set<String> roles) {
         return Jwts.builder()
                 .subject(email)
+                .claim("roles", roles)   // dodajemy role
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + jwtExpiresMinutes * 60 * 1000))
                 .signWith(getSignInKey())
@@ -55,6 +57,14 @@ public class JwtService {
      */
     public String extractEmail() {
         return claims != null ? claims.getSubject() : null;
+    }
+
+    /**
+     * Zwraca role z ostatnio zweryfikowanego tokena.
+     */
+    @SuppressWarnings("unchecked")
+    public Set<String> extractRoles() {
+        return claims != null ? claims.get("roles", Set.class) : null;
     }
 
     private SecretKey getSignInKey() {
