@@ -23,7 +23,7 @@ import { useNavigate } from "react-router-dom";
 
 // 🔹 Importuj komponenty
 import UsersList from './Employee.tsx';
-import HomePage from './Settings.tsx';
+import HomePage from './HomeFront.tsx';
 import SettingsPage from './Settings.tsx';
 
 const drawerWidth = 240;
