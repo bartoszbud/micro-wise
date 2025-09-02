@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/auth")
@@ -39,7 +40,8 @@ public class AuthenticationController {
             LoginResponse loginResponse = authenticationService.login(loginRequest);
 
             // generujemy token na podstawie emaila
-            String token = jwtService.generateToken(loginResponse.getEmail());
+            Set<String> roles = loginResponse.getRoles(); 
+            String token = jwtService.generateToken(loginRequest.getEmail(), roles);
 
             // zwracamy JSON z tokenem i danymi użytkownika
             Map<String, Object> response = Map.of(

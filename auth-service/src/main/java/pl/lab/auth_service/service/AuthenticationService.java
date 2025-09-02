@@ -55,35 +55,38 @@ public class AuthenticationService {
     }
 
     /**
-     * Logowanie użytkownika i zwrócenie email + nickname + ról
-     */
-    public LoginResponse login(LoginRequest loginRequest) {
-        Authentication authenticationRequest =
-                UsernamePasswordAuthenticationToken.unauthenticated(
-                        loginRequest.getEmail(),
-                        loginRequest.getPassword()
-                );
+ * Logowanie użytkownika i zwrócenie email + nickname + ról + token
+ */
+public LoginResponse login(LoginRequest loginRequest) {
+    Authentication authenticationRequest =
+            UsernamePasswordAuthenticationToken.unauthenticated(
+                    loginRequest.getEmail(),
+                    loginRequest.getPassword()
+            );
 
-        Authentication authenticationResponse = this.authenticationManager.authenticate(authenticationRequest);
-        SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
+    Authentication authenticationResponse = this.authenticationManager.authenticate(authenticationRequest);
+    SecurityContextHolder.getContext().setAuthentication(authenticationResponse);
 
-        UserDetails userDetails = (UserDetails) authenticationResponse.getPrincipal();
+    UserDetails userDetails = (UserDetails) authenticationResponse.getPrincipal();
 
-        Account account = accountRepository.findByEmail(userDetails.getUsername())
-                .orElseThrow(() -> new RuntimeException("Account not found"));
+    Account account = accountRepository.findByEmail(userDetails.getUsername())
+            .orElseThrow(() -> new RuntimeException("Account not found"));
 
-        // Aktualizacja ostatniego logowania
-        account.setLastLogin(java.time.LocalDateTime.now());
-        accountRepository.save(account);
+    // Aktualizacja ostatniego logowania
+    account.setLastLogin(java.time.LocalDateTime.now());
+    accountRepository.save(account);
 
-        // Zbieramy role jako Stringi
-        Set<String> roles = account.getRoles().stream()
-                .map(role -> role.getName().name())
-                .collect(Collectors.toSet());
+    // Zbieramy role jako Stringi
+    Set<String> roles = account.getRoles().stream()
+            .map(role -> role.getName().name())
+            .collect(Collectors.toSet());
 
-        // Zwracamy email, nickname i role
-        return new LoginResponse(account.getEmail(), account.getNickname(), roles);
-    }
+    // 🔑 generujemy token z rolami
+    String token = jwtService.generateToken(account.getEmail(), roles);
+
+    // 🔙 zwracamy email, nickname, role i token
+    return new LoginResponse(account.getEmail(), account.getNickname(), roles, token);
+}
 
     /**
      * Rejestracja nowego konta z domyślną rolą ROLE_USER i powiadomienie mikroserwisu employee

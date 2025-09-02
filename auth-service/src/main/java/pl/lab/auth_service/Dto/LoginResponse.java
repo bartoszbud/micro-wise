@@ -12,4 +12,5 @@ public class LoginResponse {
     private String email;
     private String nickname;
     private Set<String> roles;
+    private String token;
 }
