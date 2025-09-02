@@ -85,6 +85,7 @@ const LoginForm: React.FC = () => {
                             fullWidth
                             id="password"
                             label="Password"
+                            type="password"
                             value={user.password}
                             onChange={handleChange} />
                     </Grid>
