@@ -21,16 +21,33 @@ import {
 import { PeopleOutline, Home as HomeIcon, Settings, Logout } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 
-// 🔹 Importuj nowo utworzone komponenty
+// 🔹 Importuj komponenty
 import UsersList from './Employee.tsx';
 import HomePage from './Settings.tsx';
 import SettingsPage from './Settings.tsx';
 
 const drawerWidth = 240;
 
-const App: React.FC = () => { // Zmieniłem nazwę z UsersList na App, aby była bardziej ogólna
-  const [selectedMenu, setSelectedMenu] = useState('users');
-  const [darkMode, setDarkMode] = useState(false);
+const parseJwt = (token: string) => {
+  try {
+    const base64Payload = token.split(".")[1];
+    const payload = atob(base64Payload);
+    return JSON.parse(payload);
+  } catch {
+    return null;
+  }
+};
+
+const getUserRoles = (): string[] => {
+  const token = localStorage.getItem("token");
+  if (!token) return [];
+  const payload = parseJwt(token);
+  return payload?.roles || [];
+};
+
+const App: React.FC = () => {
+  const [selectedMenu, setSelectedMenu] = useState('home');
+  const [darkMode, setDarkMode] = useState(true);
   const navigate = useNavigate();
 
   const theme = useMemo(() => createTheme({
@@ -54,10 +71,13 @@ const App: React.FC = () => { // Zmieniłem nazwę z UsersList na App, aby była
     }
   };
 
-  // 🔹 Użyj useMemo do dynamicznego wyboru komponentu
+  // 🔹 Renderowanie treści w zależności od wybranego menu i roli
   const renderContent = useMemo(() => {
+    const roles = getUserRoles();
+
     switch (selectedMenu) {
       case 'users':
+        if (!roles.includes("ROLE_ADMIN")) return <div>Brak dostępu</div>;
         return <UsersList />;
       case 'home':
         return <HomePage />;
@@ -67,6 +87,8 @@ const App: React.FC = () => { // Zmieniłem nazwę z UsersList na App, aby była
         return null;
     }
   }, [selectedMenu]);
+
+  const userRoles = getUserRoles();
 
   return (
     <ThemeProvider theme={theme}>
@@ -99,6 +121,7 @@ const App: React.FC = () => { // Zmieniłem nazwę z UsersList na App, aby była
             </Box>
           </Toolbar>
         </AppBar>
+
         <Drawer
           variant="permanent"
           sx={{
@@ -110,18 +133,22 @@ const App: React.FC = () => { // Zmieniłem nazwę z UsersList na App, aby była
           <Toolbar />
           <Box sx={{ overflow: 'auto' }}>
             <List>
-              <ListItem disablePadding>
-                <ListItemButton selected={selectedMenu === 'users'} onClick={() => setSelectedMenu('users')}>
-                  <ListItemIcon><PeopleOutline /></ListItemIcon>
-                  <ListItemText primary="Users List" />
-                </ListItemButton>
-              </ListItem>
+              {userRoles.includes("ROLE_ADMIN") && (
+                <ListItem disablePadding>
+                  <ListItemButton selected={selectedMenu === 'users'} onClick={() => setSelectedMenu('users')}>
+                    <ListItemIcon><PeopleOutline /></ListItemIcon>
+                    <ListItemText primary="Users List" />
+                  </ListItemButton>
+                </ListItem>
+              )}
+
               <ListItem disablePadding>
                 <ListItemButton selected={selectedMenu === 'home'} onClick={() => setSelectedMenu('home')}>
                   <ListItemIcon><HomeIcon /></ListItemIcon>
                   <ListItemText primary="Home" />
                 </ListItemButton>
               </ListItem>
+
               <ListItem disablePadding>
                 <ListItemButton selected={selectedMenu === 'settings'} onClick={() => setSelectedMenu('settings')}>
                   <ListItemIcon><Settings /></ListItemIcon>
@@ -131,6 +158,7 @@ const App: React.FC = () => { // Zmieniłem nazwę z UsersList na App, aby była
             </List>
           </Box>
         </Drawer>
+
         <Box component="main" sx={{ flexGrow: 1, bgcolor: 'background.default', p: 3 }}>
           <Toolbar />
           {renderContent}
