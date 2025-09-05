@@ -66,6 +66,11 @@ public class AccountService {
         return updatedAccount;
     }
 
+    public Account getAccountByEmail(String email) {
+        return accountRepository.findByEmail(email).orElse(null);
+    }
+
+
     public void deleteAccountById (Integer id) {
         accountRepository.deleteById(id);
         log.info("Account with id: {} deleted successfully", id);

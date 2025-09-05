@@ -13,9 +13,10 @@ import {
 import { AccountCircle, Dashboard, Settings } from "@mui/icons-material";
 
 interface User {
-  nickname: string;
+  firstName: string;
+  lastName: string;
   email: string;
-  roles: string[];
+  roles?: string[];
 }
 
 const HomePage: React.FC = () => {
@@ -24,8 +25,15 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
+      const email = localStorage.getItem("email"); // pobranie email z localStorage
+      if (!email) {
+        console.error("Brak email w localStorage");
+        setLoading(false);
+        return;
+      }
+
       try {
-        const res = await axios.get("/account/", { withCredentials: true });
+        const res = await axios.post(`/account/me`, {email} );
         setUser(res.data);
       } catch (err) {
         console.error("Błąd pobierania danych użytkownika:", err);
@@ -33,6 +41,7 @@ const HomePage: React.FC = () => {
         setLoading(false);
       }
     };
+
     fetchUser();
   }, []);
 
@@ -49,10 +58,12 @@ const HomePage: React.FC = () => {
               <AccountCircle fontSize="large" />
             </Avatar>
             <Box>
-              <Typography variant="h4">Witaj, {user?.nickname}!</Typography>
+              <Typography variant="h4">
+                Witaj, {user?.firstName} {user?.lastName}!
+              </Typography>
               <Typography variant="subtitle1">{user?.email}</Typography>
               <Typography variant="subtitle2">
-                Role: {user?.roles.join(", ")}
+                Role: {user?.roles?.join(", ")}
               </Typography>
             </Box>
           </Box>

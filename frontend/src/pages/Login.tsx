@@ -91,6 +91,7 @@ import { LockOutlined } from "@mui/icons-material";
                                 fullWidth
                                 id="password"
                                 label="Password"
+                                type="password"
                                 value={user.password}
                                 onChange={handleChange} />
                         </Grid>

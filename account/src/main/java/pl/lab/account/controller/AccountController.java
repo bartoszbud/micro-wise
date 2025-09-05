@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @Validated
@@ -33,27 +34,39 @@ public class AccountController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<Account>> getAllAccounts(){
+    public ResponseEntity<List<Account>> getAllAccounts() {
         return ResponseEntity.ok().body(accountService.getAllAccounts());
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Account> getAccountById(@PathVariable Integer id)
-    {
+    public ResponseEntity<Account> getAccountById(@PathVariable Integer id) {
         return ResponseEntity.ok().body(accountService.getAccountById(id));
     }
 
+    @PostMapping("/me")
+    public ResponseEntity<Account> getAccountByEmail(@RequestBody Map<String, String> request) {
+        String email = request.get("email");
+        if(email == null || email.isEmpty()){
+            return ResponseEntity.badRequest().build();
+        }
+
+        Account account = accountService.getAccountByEmail(email);
+        if(account == null){
+            return ResponseEntity.notFound().build();
+        }
+
+        return ResponseEntity.ok(account);
+    }
+
+
     @PutMapping("/")
-    public ResponseEntity<Account> updateAccount(@RequestBody Account account)
-    {
+    public ResponseEntity<Account> updateAccount(@RequestBody Account account) {
         return ResponseEntity.ok().body(accountService.updateAccount(account));
     }
     
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAccountById(@PathVariable Integer id)
-    {
+    public ResponseEntity<String> deleteAccountById(@PathVariable Integer id) {
         accountService.deleteAccountById(id);
         return ResponseEntity.ok().body("Deleted account successfully");
     }
-
 }
