@@ -16,7 +16,7 @@ interface User {
   firstName: string;
   lastName: string;
   email: string;
-  roles: string[];
+  roles?: string[];
 }
 
 const HomePage: React.FC = () => {
@@ -33,9 +33,7 @@ const HomePage: React.FC = () => {
       }
 
       try {
-        const res = await axios.post(`/account/me`, {
-          params: { email }, // query param
-        });
+        const res = await axios.post(`/account/me`, {email} );
         setUser(res.data);
       } catch (err) {
         console.error("Błąd pobierania danych użytkownika:", err);
@@ -65,7 +63,7 @@ const HomePage: React.FC = () => {
               </Typography>
               <Typography variant="subtitle1">{user?.email}</Typography>
               <Typography variant="subtitle2">
-                Role: {user?.roles.join(", ")}
+                Role: {user?.roles?.join(", ")}
               </Typography>
             </Box>
           </Box>
